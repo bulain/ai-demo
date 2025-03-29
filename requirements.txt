@@ -12,5 +12,5 @@ openai~=1.61.0
 swarm~=0.1.0
 dspy~=2.6.16
 autogen-agentchat~=0.4.9.3
-autogen-ext[openai]~=0.4.9.3
+autogen-ext[openai,langchain]~=0.4.9.3
 
