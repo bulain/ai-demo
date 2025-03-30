@@ -85,5 +85,9 @@ documents = [
 ]
 uuids = [str(uuid4()) for _ in range(len(documents))]
 
-vector_store.add_documents(documents=documents, ids=uuids)
+ret = vector_store.add_documents(documents=documents, ids=uuids)
+print(ret)
 
+# 查询
+resp = vector_store.search(query="how about LangChain?", search_type="similarity")
+print(resp)
