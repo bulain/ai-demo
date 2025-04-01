@@ -179,3 +179,6 @@ cython_debug/
 *.csv
 *.json
 *.html
+*.txt
+*.docx
+*.xlsx

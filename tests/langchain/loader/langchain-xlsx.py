@@ -1,11 +1,11 @@
 import asyncio
 
-from langchain_community.document_loaders import UnstructuredPDFLoader
+from langchain_community.document_loaders import UnstructuredExcelLoader
 
 
 async def app():
-    file_path = "./pdf-demo.pdf"
-    loader = UnstructuredPDFLoader(
+    file_path = "./xlsx-demo.xlsx"
+    loader = UnstructuredExcelLoader(
         file_path=file_path
     )
     docs = []

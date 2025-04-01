@@ -1,11 +1,11 @@
 import asyncio
 
-from langchain_community.document_loaders import UnstructuredPDFLoader
+from langchain_community.document_loaders import UnstructuredWordDocumentLoader
 
 
 async def app():
-    file_path = "./pdf-demo.pdf"
-    loader = UnstructuredPDFLoader(
+    file_path = "./docx-demo.docx"
+    loader = UnstructuredWordDocumentLoader(
         file_path=file_path
     )
     docs = []

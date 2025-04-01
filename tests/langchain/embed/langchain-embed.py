@@ -3,7 +3,7 @@ from decouple import config
 
 client = OpenAI(
     api_key=config("ALI_API_KEY"),
-    base_url=config("ALI_BASE_URL")
+    base_url=config("ALI_BASE_URL") + "/compatible-mode/v1"
 )
 
 completion = client.embeddings.create(
