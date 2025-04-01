@@ -1,7 +1,7 @@
 from langchain_community.document_loaders.csv_loader import CSVLoader
 
 file_path = (
-    "./cvs-demo.csv"
+    "./data/cvs-demo.csv"
 )
 
 print("<========================>")

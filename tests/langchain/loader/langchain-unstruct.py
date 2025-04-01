@@ -4,7 +4,7 @@ from langchain_community.document_loaders import UnstructuredPDFLoader
 
 
 async def app():
-    file_path = "./pdf-demo.pdf"
+    file_path = "data/pdf-demo.pdf"
     loader = UnstructuredPDFLoader(
         file_path=file_path
     )

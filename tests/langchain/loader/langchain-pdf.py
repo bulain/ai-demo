@@ -6,7 +6,7 @@ from langchain_core.vectorstores import InMemoryVectorStore
 
 
 async def app():
-    file_path = "./pdf-demo.pdf"
+    file_path = "data/pdf-demo.pdf"
     loader = PyPDFLoader(file_path)
     pages = []
     async for page in loader.alazy_load():

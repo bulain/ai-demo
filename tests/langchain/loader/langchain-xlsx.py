@@ -4,7 +4,7 @@ from langchain_community.document_loaders import UnstructuredExcelLoader
 
 
 async def app():
-    file_path = "./xlsx-demo.xlsx"
+    file_path = "data/xlsx-demo.xlsx"
     loader = UnstructuredExcelLoader(
         file_path=file_path
     )

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from pprint import pprint
 
-file_path = './json-demo.json'
+file_path = 'data/json-demo.json'
 data = json.loads(Path(file_path).read_text())
 pprint(data)
 
