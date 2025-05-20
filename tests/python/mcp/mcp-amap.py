@@ -1,5 +1,5 @@
 from agents import Agent, Runner, set_tracing_disabled, OpenAIChatCompletionsModel
-from agents.mcp import MCPServerStreamableHttp, MCPServerStreamableHttpParams
+from agents.mcp import MCPServerSse, MCPServerSseParams
 from decouple import config
 from openai import AsyncOpenAI
 
@@ -8,8 +8,8 @@ set_tracing_disabled(True)
 
 async def mcp_run():
     # Initialize MCP server
-    mcp_sserver = MCPServerStreamableHttp(
-        MCPServerStreamableHttpParams(url="http://127.0.0.1:8000/mcp"),
+    mcp_sserver = MCPServerSse(
+        MCPServerSseParams(url="https://mcp.amap.com/sse?key="+config("AMAP_API_KEY")),
         cache_tools_list=True
     )
 

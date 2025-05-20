@@ -1,16 +1,11 @@
 import httpx
 from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("Demo Mcp", stateless_http=True, json_response=True)
-
-@mcp.tool()
-def calculate_bmi(weight_kg: float, height_m: float) -> float:
-    """Calculate BMI given weight in kg and height in meters"""
-    return weight_kg / (height_m**2)
+mcp = FastMCP("MCP Server", stateless_http=True, json_response=True)
 
 @mcp.tool()
 async def fetch_weather(city: str) -> str:
-    """Fetch current weather for a city"""
+    """根据城市名称查询指定城市的天气"""
     async with httpx.AsyncClient() as client:
         return "天晴，25度"
 
