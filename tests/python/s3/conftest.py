@@ -1,4 +1,5 @@
 import uuid
+from urllib.parse import urlsplit, urlunsplit
 
 import boto3
 import pytest
@@ -6,10 +7,25 @@ from botocore.config import Config
 from decouple import config
 
 
+def _add_trailing_slash(request, **kwargs):
+    """给 bucket 级请求路径补尾斜杠。
+
+    该端点是 nginx 反向代理，访问 /bucket 会 301 重定向到 /bucket/；
+    但 SigV4 已对无斜杠路径签名，无法跟随重定向，且 botocore 会把 301
+    误判为区域重定向导致无限递归。故在签名前补上尾斜杠。
+    """
+    parts = urlsplit(request.url)
+    if not parts.path.endswith("/"):
+        request.url = urlunsplit(
+            (parts.scheme, parts.netloc, parts.path + "/", parts.query, parts.fragment)
+        )
+    return request
+
+
 @pytest.fixture(scope="session")
 def s3_client():
     """构造适配 S3 兼容端点的 boto3 客户端"""
-    return boto3.client(
+    client = boto3.client(
         "s3",
         endpoint_url=config("S3_ENDPOINT_URL"),
         aws_access_key_id=config("S3_ACCESS_KEY"),
@@ -20,6 +36,9 @@ def s3_client():
             s3={"addressing_style": "path"},       # 对应 path: auto
         ),
     )
+    # bucket 级操作（如列举）需要尾斜杠，签名前改写路径
+    client.meta.events.register("before-sign.s3.ListObjectsV2", _add_trailing_slash)
+    return client
 
 
 @pytest.fixture(scope="session")
