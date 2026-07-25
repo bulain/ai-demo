@@ -25,11 +25,13 @@ class Attachment:
         )
 
     def upload(self, image_bytes: bytes) -> str:
-        """上传图片，返回 key，格式 'g01_YYMMDD_<uuid>.png'"""
-        key = f"g01_{date.today():%y%m%d}_{uuid.uuid4().hex}.png"
+        """上传图片，S3 路径 'g01/YYMMDD/<uuid>.png'，返回 key 'g01_YYMMDD_<uuid>.png'"""
+        name = f"{date.today():%y%m%d}/{uuid.uuid4().hex}.png"  # 260725/abc.png
+        s3_key = f"g01/{name}"                                  # g01/260725/abc.png（存 S3）
+        key = f"g01_{name.replace('/', '_')}"                   # g01_260725_abc.png（对外返回）
         self._client.put_object(
             Bucket=self._bucket,
-            Key=key,
+            Key=s3_key,
             Body=image_bytes,
             ContentType="image/png",
         )
@@ -37,11 +39,12 @@ class Attachment:
 
     def view_url(self, attachment_id: str, expire_seconds: int = 300) -> str:
         """传入 upload 返回的 key，生成内联查看的预签名 URL"""
+        s3_key = attachment_id.replace("_", "/", 2)  # g01_260725_abc.png -> g01/260725/abc.png
         return self._client.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": self._bucket,
-                "Key": attachment_id,
+                "Key": s3_key,
                 "ResponseContentType": "image/png",
                 "ResponseContentDisposition": "inline",
             },
