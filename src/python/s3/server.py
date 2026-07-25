@@ -1,5 +1,6 @@
 import uuid
 from datetime import date
+from pathlib import Path
 
 import boto3
 from botocore.config import Config
@@ -19,9 +20,6 @@ _client = boto3.client(
     config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
 )
 
-# content-type -> 扩展名映射
-_EXT = {"image/png": "png", "image/jpeg": "jpg", "image/gif": "gif", "image/webp": "webp"}
-
 
 @app.post("/images")
 async def upload_image(file: UploadFile):
@@ -29,10 +27,13 @@ async def upload_image(file: UploadFile):
     content_type = file.content_type or ""
     if not content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="仅支持图片文件")
-    ext = _EXT.get(content_type, "bin")
-    key = f"g01_{date.today():%y%m%d}_{uuid.uuid4().hex}.{ext}"
+    # 扩展名跟随上传文件名，缺省用 .png
+    ext = Path(file.filename or "").suffix or ".png"
+    name = f"{date.today():%y%m%d}/{uuid.uuid4().hex}{ext}"  # 260725/abc.png
+    s3_key = f"g01/{name}"                                   # g01/260725/abc.png（存 S3）
+    key = f"g01_{name.replace('/', '_')}"                    # g01_260725_abc.png（对外返回）
     _client.put_object(
-        Bucket=_BUCKET, Key=key, Body=await file.read(), ContentType=content_type
+        Bucket=_BUCKET, Key=s3_key, Body=await file.read(), ContentType=content_type
     )
     return {"key": key, "view_url": f"/images/{key}"}
 
@@ -40,8 +41,9 @@ async def upload_image(file: UploadFile):
 @app.get("/images/{key}")
 async def view_image(key: str):
     """从 S3 读取图片并直接返回字节流"""
+    s3_key = key.replace("_", "/", 2)  # g01_260725_abc.png -> g01/260725/abc.png
     try:
-        obj = _client.get_object(Bucket=_BUCKET, Key=key)
+        obj = _client.get_object(Bucket=_BUCKET, Key=s3_key)
     except _client.exceptions.NoSuchKey:
         raise HTTPException(status_code=404, detail="图片不存在")
     return Response(
