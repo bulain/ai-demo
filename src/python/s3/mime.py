@@ -37,6 +37,12 @@ class Attachment:
         )
         return key
 
+    def download(self, attachment_id: str) -> bytes:
+        """传入 upload 返回的 key，从 S3 读取原始字节"""
+        s3_key = attachment_id.replace("_", "/", 2)  # g01_260725_abc.png -> g01/260725/abc.png
+        obj = self._client.get_object(Bucket=self._bucket, Key=s3_key)
+        return obj["Body"].read()
+
     def view_url(self, attachment_id: str, expire_seconds: int = 300) -> str:
         """传入 upload 返回的 key，生成内联查看的预签名 URL"""
         s3_key = attachment_id.replace("_", "/", 2)  # g01_260725_abc.png -> g01/260725/abc.png

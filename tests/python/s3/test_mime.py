@@ -1,4 +1,5 @@
 import requests
+import pytest
 from pathlib import Path
 
 from src.python.s3.mime import Attachment
@@ -25,3 +26,16 @@ def test_upload_and_view():
     assert resp.status_code == 200
     assert resp.content == data
     assert resp.headers["Content-Type"] == "image/png"
+
+
+def test_upload_and_download():
+    """上传图片 → download() 取回字节一致；不存在的 key 抛异常"""
+    att = Attachment()
+    data = _SAMPLE_PNG.read_bytes()
+    key = att.upload(data)
+
+    got = att.download(key)
+    assert got == data
+
+    with pytest.raises(Exception):
+        att.download("g01_260725_nonexistent.png")
