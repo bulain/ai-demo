@@ -1,5 +1,6 @@
 import uuid
 from datetime import date
+from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
 import boto3
@@ -54,6 +55,19 @@ def test_object(s3_client, s3_bucket):
     # key 格式：g01/YYMMDD/<uuid>.png
     key = f"g01/{date.today():%y%m%d}/{uuid.uuid4().hex}.png"
     content = f"hello s3 {uuid.uuid4()}".encode("utf-8")
+    yield key, content
+    # teardown：删除临时对象，保持桶干净
+    #s3_client.delete_object(Bucket=s3_bucket, Key=key)
+
+
+_SAMPLE_PNG = Path(__file__).parent / "fixtures" / "sample.png"
+
+
+@pytest.fixture
+def image_object(s3_client, s3_bucket):
+    """生成临时图片测试对象，测试结束后自动删除"""
+    key = f"g01/{date.today():%y%m%d}/{uuid.uuid4().hex}.png"
+    content = _SAMPLE_PNG.read_bytes()
     yield key, content
     # teardown：删除临时对象，保持桶干净
     s3_client.delete_object(Bucket=s3_bucket, Key=key)

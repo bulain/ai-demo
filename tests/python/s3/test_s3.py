@@ -41,3 +41,28 @@ def test_download_presigned_url(s3_client, s3_bucket, test_object):
     resp = requests.get(url, timeout=30)
     assert resp.status_code == 200
     assert resp.content == content
+
+
+def test_view_presigned_image_url(s3_client, s3_bucket, image_object):
+    """上传真实图片，生成可在浏览器内联查看的预签名 URL"""
+    key, content = image_object
+    s3_client.put_object(
+        Bucket=s3_bucket, Key=key, Body=content, ContentType="image/png"
+    )
+
+    url = s3_client.generate_presigned_url(
+        "get_object",
+        Params={
+            "Bucket": s3_bucket,
+            "Key": key,
+            "ResponseContentType": "image/png",
+            "ResponseContentDisposition": "inline",
+        },
+        ExpiresIn=300,
+    )
+    print(f"\n图片查看地址: {url}")
+
+    resp = requests.get(url, timeout=30)
+    assert resp.status_code == 200
+    assert resp.content == content
+    assert resp.headers["Content-Type"] == "image/png"
