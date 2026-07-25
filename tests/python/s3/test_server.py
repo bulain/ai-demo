@@ -1,11 +1,13 @@
 from pathlib import Path
 
+from decouple import config
 from fastapi.testclient import TestClient
 
 from src.python.s3.server import app
 
 client = TestClient(app)
 _SAMPLE_PNG = Path(__file__).parent / "fixtures" / "sample.png"
+_PREFIX = config("S3_KEY_PREFIX", default="g01")
 
 
 def test_upload_and_view():
@@ -17,7 +19,7 @@ def test_upload_and_view():
     )
     assert resp.status_code == 200
     body = resp.json()
-    assert body["key"].startswith("g01_")
+    assert body["key"].startswith(f"{_PREFIX}_")
     assert body["key"].endswith(".png")
 
     view = client.get(body["view_url"])

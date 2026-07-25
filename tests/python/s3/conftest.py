@@ -49,11 +49,17 @@ def s3_bucket():
     return config("S3_BUCKET")
 
 
+@pytest.fixture(scope="session")
+def s3_prefix():
+    """返回对象 key 前缀"""
+    return config("S3_KEY_PREFIX", default="g01")
+
+
 @pytest.fixture
-def test_object(s3_client, s3_bucket):
+def test_object(s3_client, s3_bucket, s3_prefix):
     """生成临时测试对象，测试结束后自动删除"""
-    # key 格式：g01/YYMMDD/<uuid>.png
-    key = f"g01/{date.today():%y%m%d}/{uuid.uuid4().hex}.png"
+    # key 格式：<prefix>/YYMMDD/<uuid>.png
+    key = f"{s3_prefix}/{date.today():%y%m%d}/{uuid.uuid4().hex}.png"
     content = f"hello s3 {uuid.uuid4()}".encode("utf-8")
     yield key, content
     # teardown：删除临时对象，保持桶干净
@@ -64,9 +70,9 @@ _SAMPLE_PNG = Path(__file__).parent / "fixtures" / "sample.png"
 
 
 @pytest.fixture
-def image_object(s3_client, s3_bucket):
+def image_object(s3_client, s3_bucket, s3_prefix):
     """生成临时图片测试对象，测试结束后自动删除"""
-    key = f"g01/{date.today():%y%m%d}/{uuid.uuid4().hex}.png"
+    key = f"{s3_prefix}/{date.today():%y%m%d}/{uuid.uuid4().hex}.png"
     content = _SAMPLE_PNG.read_bytes()
     yield key, content
     # teardown：删除临时对象，保持桶干净

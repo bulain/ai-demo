@@ -12,6 +12,7 @@ class Attachment:
     def __init__(self):
         # 配置从 .env 读取（python-decouple）
         self._bucket = config("S3_BUCKET")
+        self._prefix = config("S3_KEY_PREFIX", default="g01")  # 前缀不能含下划线
         self._client = boto3.client(
             "s3",
             endpoint_url=config("S3_ENDPOINT_URL"),
@@ -25,10 +26,10 @@ class Attachment:
         )
 
     def upload(self, image_bytes: bytes) -> str:
-        """上传图片，S3 路径 'g01/YYMMDD/<uuid>.png'，返回 key 'g01_YYMMDD_<uuid>.png'"""
+        """上传图片，S3 路径 '<prefix>/YYMMDD/<uuid>.png'，返回 key '<prefix>_YYMMDD_<uuid>.png'"""
         name = f"{date.today():%y%m%d}/{uuid.uuid4().hex}.png"  # 260725/abc.png
-        s3_key = f"g01/{name}"                                  # g01/260725/abc.png（存 S3）
-        key = f"g01_{name.replace('/', '_')}"                   # g01_260725_abc.png（对外返回）
+        s3_key = f"{self._prefix}/{name}"                       # g01/260725/abc.png（存 S3）
+        key = f"{self._prefix}_{name.replace('/', '_')}"        # g01_260725_abc.png（对外返回）
         self._client.put_object(
             Bucket=self._bucket,
             Key=s3_key,

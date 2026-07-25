@@ -2,9 +2,12 @@ import requests
 import pytest
 from pathlib import Path
 
+from decouple import config
+
 from src.python.s3.mime import Attachment
 
 _SAMPLE_PNG = Path(__file__).parent / "fixtures" / "sample.png"
+_PREFIX = config("S3_KEY_PREFIX", default="g01")
 
 
 def test_upload_and_view():
@@ -13,9 +16,9 @@ def test_upload_and_view():
     data = _SAMPLE_PNG.read_bytes()
     key = att.upload(data)
     print(f"\n返回UUID: {key}")
-    assert key.startswith("g01_")
+    assert key.startswith(f"{_PREFIX}_")
     assert key.endswith(".png")
-    assert len(key) == len("g01_YYMMDD_") + 32 + len(".png")
+    assert len(key) == len(f"{_PREFIX}_YYMMDD_") + 32 + len(".png")
 
     url = att.view_url(key)
     print(f"\n图片查看地址: {url}")
@@ -38,4 +41,4 @@ def test_upload_and_download():
     assert got == data
 
     with pytest.raises(Exception):
-        att.download("g01_260725_nonexistent.png")
+        att.download(f"{_PREFIX}_260725_nonexistent.png")

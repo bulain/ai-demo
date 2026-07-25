@@ -11,6 +11,7 @@ from fastapi.responses import Response
 app = FastAPI()
 
 _BUCKET = config("S3_BUCKET")
+_PREFIX = config("S3_KEY_PREFIX", default="g01")  # 前缀不能含下划线
 _client = boto3.client(
     "s3",
     endpoint_url=config("S3_ENDPOINT_URL"),
@@ -30,8 +31,8 @@ async def upload_image(file: UploadFile):
     # 扩展名跟随上传文件名，缺省用 .png
     ext = Path(file.filename or "").suffix or ".png"
     name = f"{date.today():%y%m%d}/{uuid.uuid4().hex}{ext}"  # 260725/abc.png
-    s3_key = f"g01/{name}"                                   # g01/260725/abc.png（存 S3）
-    key = f"g01_{name.replace('/', '_')}"                    # g01_260725_abc.png（对外返回）
+    s3_key = f"{_PREFIX}/{name}"                             # g01/260725/abc.png（存 S3）
+    key = f"{_PREFIX}_{name.replace('/', '_')}"              # g01_260725_abc.png（对外返回）
     _client.put_object(
         Bucket=_BUCKET, Key=s3_key, Body=await file.read(), ContentType=content_type
     )
