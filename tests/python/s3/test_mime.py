@@ -1,13 +1,17 @@
 import requests
+from pathlib import Path
 
 from src.python.s3.mime import Attachment
+
+_SAMPLE_PNG = Path(__file__).parent / "fixtures" / "sample.png"
 
 
 def test_upload_and_view():
     """上传图片 → 查看签名 URL → 匿名下载内容一致"""
     att = Attachment()
-    data = open("tests/python/s3/fixtures/sample.png", "rb").read()
+    data = _SAMPLE_PNG.read_bytes()
     key = att.upload(data)
+    print(f"\n返回UUID: {key}")
     assert key.startswith("g01_")
     assert key.endswith(".png")
     assert len(key) == len("g01_YYMMDD_") + 32 + len(".png")
