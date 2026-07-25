@@ -12,3 +12,12 @@ def test_list(s3_client, s3_bucket, test_object):
     resp = s3_client.list_objects_v2(Bucket=s3_bucket, Prefix=key)
     keys = [obj["Key"] for obj in resp.get("Contents", [])]
     assert key in keys
+
+
+def test_download_roundtrip(s3_client, s3_bucket, test_object):
+    """上传后下载，断言内容字节完全一致"""
+    key, content = test_object
+    s3_client.put_object(Bucket=s3_bucket, Key=key, Body=content)
+    resp = s3_client.get_object(Bucket=s3_bucket, Key=key)
+    downloaded = resp["Body"].read()
+    assert downloaded == content
