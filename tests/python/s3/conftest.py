@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 from urllib.parse import urlsplit, urlunsplit
 
 import boto3
@@ -50,7 +51,8 @@ def s3_bucket():
 @pytest.fixture
 def test_object(s3_client, s3_bucket):
     """生成临时测试对象，测试结束后自动删除"""
-    key = f"test-{uuid.uuid4()}.txt"
+    # key 格式：g01/YYMMDD/<uuid>.png
+    key = f"g01/{date.today():%y%m%d}/{uuid.uuid4().hex}.png"
     content = f"hello s3 {uuid.uuid4()}".encode("utf-8")
     yield key, content
     # teardown：删除临时对象，保持桶干净
