@@ -1,3 +1,6 @@
+import requests
+
+
 def test_upload(s3_client, s3_bucket, test_object):
     """上传对象，断言响应状态码为 200"""
     key, content = test_object
@@ -21,3 +24,20 @@ def test_download_roundtrip(s3_client, s3_bucket, test_object):
     resp = s3_client.get_object(Bucket=s3_bucket, Key=key)
     downloaded = resp["Body"].read()
     assert downloaded == content
+
+
+def test_download_presigned_url(s3_client, s3_bucket, test_object):
+    """生成 get_object 预签名 URL，匿名下载并校验内容一致"""
+    key, content = test_object
+    s3_client.put_object(Bucket=s3_bucket, Key=key, Body=content)
+
+    url = s3_client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": s3_bucket, "Key": key},
+        ExpiresIn=300,
+    )
+    print(f"\n预签名下载地址: {url}")
+
+    resp = requests.get(url, timeout=30)
+    assert resp.status_code == 200
+    assert resp.content == content
