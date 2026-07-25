@@ -70,4 +70,4 @@ def image_object(s3_client, s3_bucket):
     content = _SAMPLE_PNG.read_bytes()
     yield key, content
     # teardown：删除临时对象，保持桶干净
-    s3_client.delete_object(Bucket=s3_bucket, Key=key)
+    #s3_client.delete_object(Bucket=s3_bucket, Key=key)
